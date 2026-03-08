@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart To-Do List Calendar</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="app-title" data-testid="app-title">
+                    <i class="fas fa-calendar-check"></i>
+                    Smart To-Do Calendar
+                </h1>
+                <button class="theme-toggle" id="themeToggle" data-testid="theme-toggle-btn" aria-label="Toggle dark mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Calendar Section -->
+            <section class="calendar-section">
+                <div class="calendar-header">
+                    <button class="nav-btn" id="prevMonth" data-testid="prev-month-btn">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <h2 class="current-month" id="currentMonth" data-testid="current-month"></h2>
+                    <button class="nav-btn" id="nextMonth" data-testid="next-month-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <div class="calendar-grid" id="calendarGrid" data-testid="calendar-grid">
+                    <!-- Calendar days will be generated here -->
+                </div>
+            </section>
+
+            <!-- Tasks Section -->
+            <section class="tasks-section">
+                <div class="tasks-header">
+                    <h2 class="tasks-title" data-testid="tasks-title">Tasks for <span id="selectedDate" data-testid="selected-date">Today</span></h2>
+                    <button class="add-task-btn" id="addTaskBtn" data-testid="add-task-btn">
+                        <i class="fas fa-plus"></i> Add Task
+                    </button>
+                </div>
+
+                <!-- Task Filters -->
+                <div class="task-filters" data-testid="task-filters">
+                    <button class="filter-btn active" data-filter="all" data-testid="filter-all-btn">All Tasks</button>
+                    <button class="filter-btn" data-filter="pending" data-testid="filter-pending-btn">Pending</button>
+                    <button class="filter-btn" data-filter="completed" data-testid="filter-completed-btn">Completed</button>
+                </div>
+
+                <!-- Tasks List -->
+                <div class="tasks-list" id="tasksList" data-testid="tasks-list">
+                    <div class="no-tasks" data-testid="no-tasks-message">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>No tasks for this date. Click "Add Task" to create one.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal" id="taskModal" data-testid="task-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle" data-testid="modal-title">Add New Task</h3>
+                <button class="close-btn" id="closeModal" data-testid="close-modal-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="taskForm" data-testid="task-form">
+                <div class="form-group">
+                    <label for="taskTitle">Task Title *</label>
+                    <input type="text" id="taskTitle" data-testid="task-title-input" placeholder="Enter task title" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskTime">Time</label>
+                        <input type="time" id="taskTime" data-testid="task-time-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskPriority">Priority</label>
+                        <select id="taskPriority" data-testid="task-priority-select">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskDescription">Description</label>
+                    <textarea id="taskDescription" data-testid="task-description-input" placeholder="Enter task description" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskDueDate">Due Date</label>
+                    <input type="date" id="taskDueDate" data-testid="task-due-date-input">
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="cancelBtn" data-testid="cancel-btn">Cancel</button>
+                    <button type="submit" class="btn-primary" data-testid="submit-task-btn">Save Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
