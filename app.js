@@ -81,7 +81,7 @@ function toggleTheme() {
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
-    
+
     const icon = elements.themeToggle.querySelector('i');
     icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
 }
@@ -97,14 +97,14 @@ function loadThemeFromStorage() {
 function renderCalendar() {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    
+
     // Update header
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     elements.currentMonth.textContent = `${monthNames[month]} ${year}`;
-    
+
     // Clear calendar
     elements.calendarGrid.innerHTML = '';
-    
+
     // Add day headers
     const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     dayHeaders.forEach(day => {
@@ -113,24 +113,24 @@ function renderCalendar() {
         header.textContent = day;
         elements.calendarGrid.appendChild(header);
     });
-    
+
     // Get first day of month and number of days
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const daysInPrevMonth = new Date(year, month, 0).getDate();
-    
+
     // Add days from previous month
     for (let i = firstDay - 1; i >= 0; i--) {
         const dayCell = createDayCell(daysInPrevMonth - i, true, year, month - 1);
         elements.calendarGrid.appendChild(dayCell);
     }
-    
+
     // Add days of current month
     for (let day = 1; day <= daysInMonth; day++) {
         const dayCell = createDayCell(day, false, year, month);
         elements.calendarGrid.appendChild(dayCell);
     }
-    
+
     // Add days from next month
     const remainingCells = 42 - (firstDay + daysInMonth);
     for (let day = 1; day <= remainingCells; day++) {
@@ -143,27 +143,27 @@ function createDayCell(day, isOtherMonth, year, month) {
     const cell = document.createElement('div');
     cell.className = 'day-cell';
     if (isOtherMonth) cell.classList.add('other-month');
-    
+
     const date = new Date(year, month, day);
     const dateString = formatDate(date);
-    
+
     // Check if today
     const today = new Date();
     if (date.toDateString() === today.toDateString() && !isOtherMonth) {
         cell.classList.add('today');
     }
-    
+
     // Check if selected
     if (date.toDateString() === selectedDate.toDateString() && !isOtherMonth) {
         cell.classList.add('selected');
     }
-    
+
     // Add day number
     const dayNumber = document.createElement('span');
     dayNumber.className = 'day-number';
     dayNumber.textContent = day;
     cell.appendChild(dayNumber);
-    
+
     // Check if has tasks
     const hasTasks = tasks.some(task => task.date === dateString);
     if (hasTasks && !isOtherMonth) {
@@ -171,7 +171,7 @@ function createDayCell(day, isOtherMonth, year, month) {
         indicator.className = 'task-indicator';
         cell.appendChild(indicator);
     }
-    
+
     // Add click event
     if (!isOtherMonth) {
         cell.addEventListener('click', () => {
@@ -182,7 +182,7 @@ function createDayCell(day, isOtherMonth, year, month) {
         });
         cell.setAttribute('data-testid', `day-cell-${day}`);
     }
-    
+
     return cell;
 }
 
@@ -192,20 +192,23 @@ function openAddTaskModal() {
     elements.modalTitle.textContent = 'Add New Task';
     elements.taskForm.reset();
     elements.taskDueDate.value = formatDate(selectedDate);
+
+    elements.taskDueDate.min = new Date().toISOString().split("T")[0];
+
     elements.taskModal.classList.add('active');
 }
 
 function openEditTaskModal(taskId) {
     editingTaskId = taskId;
     const task = tasks.find(t => t.id === taskId);
-    
+
     elements.modalTitle.textContent = 'Edit Task';
     elements.taskTitle.value = task.title;
     elements.taskTime.value = task.time || '';
     elements.taskDescription.value = task.description || '';
     elements.taskDueDate.value = task.dueDate || '';
     elements.taskPriority.value = task.priority;
-    
+
     elements.taskModal.classList.add('active');
 }
 
@@ -217,7 +220,44 @@ function closeModal() {
 
 function handleTaskSubmit(e) {
     e.preventDefault();
-    
+
+    const now = new Date();
+    const selectedDateValue = elements.taskDueDate.value;
+    const selectedTimeValue = elements.taskTime.value;
+
+    const dateError = document.getElementById("dateError");
+    const timeError = document.getElementById("timeError");
+
+    dateError.style.display = "none";
+    timeError.style.display = "none";
+
+    if (selectedDateValue) {
+
+        const selectedDate = new Date(selectedDateValue);
+
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        if (selectedDate < today) {
+            dateError.style.display = "block";
+            return;
+        }
+
+        if (selectedTimeValue && selectedDate.toDateString() === now.toDateString()) {
+
+            const [hours, minutes] = selectedTimeValue.split(":");
+
+            const selectedTime = new Date();
+            selectedTime.setHours(hours);
+            selectedTime.setMinutes(minutes);
+            selectedTime.setSeconds(0);
+
+            if (selectedTime < now) {
+                timeError.style.display = "block";
+                return;
+            }
+        }
+    }
+
     const taskData = {
         id: editingTaskId || Date.now().toString(),
         title: elements.taskTitle.value.trim(),
@@ -229,7 +269,7 @@ function handleTaskSubmit(e) {
         completed: false,
         createdAt: new Date().toISOString()
     };
-    
+
     if (editingTaskId) {
         // Update existing task
         const index = tasks.findIndex(t => t.id === editingTaskId);
@@ -241,7 +281,7 @@ function handleTaskSubmit(e) {
         // Add new task
         tasks.push(taskData);
     }
-    
+
     saveTasksToStorage();
     renderCalendar();
     renderTasks();
@@ -270,16 +310,16 @@ function toggleTaskStatus(taskId) {
 function renderTasks() {
     const dateString = formatDate(selectedDate);
     let filteredTasks = tasks.filter(task => task.date === dateString);
-    
+
     // Apply filter
     if (currentFilter === 'completed') {
         filteredTasks = filteredTasks.filter(task => task.completed);
     } else if (currentFilter === 'pending') {
         filteredTasks = filteredTasks.filter(task => !task.completed);
     }
-    
+
     elements.tasksList.innerHTML = '';
-    
+
     if (filteredTasks.length === 0) {
         const noTasks = document.createElement('div');
         noTasks.className = 'no-tasks';
@@ -291,7 +331,7 @@ function renderTasks() {
         elements.tasksList.appendChild(noTasks);
         return;
     }
-    
+
     filteredTasks.forEach(task => {
         const taskCard = createTaskCard(task);
         elements.tasksList.appendChild(taskCard);
@@ -303,7 +343,7 @@ function createTaskCard(task) {
     card.className = `task-card ${task.completed ? 'completed' : ''}`;
     card.style.setProperty('--priority-color', getPriorityColor(task.priority));
     card.setAttribute('data-testid', `task-card-${task.id}`);
-    
+
     card.innerHTML = `
         <div class="task-header">
             <div class="task-checkbox ${task.completed ? 'checked' : ''}" data-testid="task-checkbox-${task.id}">
@@ -330,17 +370,17 @@ function createTaskCard(task) {
             </div>
         </div>
     `;
-    
+
     // Add event listeners
     const checkbox = card.querySelector('.task-checkbox');
     checkbox.addEventListener('click', () => toggleTaskStatus(task.id));
-    
+
     const editBtn = card.querySelector('.edit');
     editBtn.addEventListener('click', () => openEditTaskModal(task.id));
-    
+
     const deleteBtn = card.querySelector('.delete');
     deleteBtn.addEventListener('click', () => deleteTask(task.id));
-    
+
     return card;
 }
 

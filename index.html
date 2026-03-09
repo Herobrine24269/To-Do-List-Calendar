@@ -107,12 +107,14 @@
 
                 <div class="form-group">
                     <label for="taskDueDate">Due Date</label>
-                    <input type="date" id="taskDueDate" data-testid="task-due-date-input">
-                </div>
+                    <input type="date" id="taskDueDate" data-testid="task-due-date-input" min="">
+                    <small id="dateError" style="color:red; display:none;">Past date allowed nahi hai</small>
+                </div>  
 
                 <div class="form-actions">
                     <button type="button" class="btn-secondary" id="cancelBtn" data-testid="cancel-btn">Cancel</button>
                     <button type="submit" class="btn-primary" data-testid="submit-task-btn">Save Task</button>
+                    <small id="timeError" style="color:red; display:none;">Past time allowed nahi hai</small>
                 </div>
             </form>
         </div>
